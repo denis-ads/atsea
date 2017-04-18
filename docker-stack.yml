@@ -1,4 +1,4 @@
-version: "3.2"
+on: "3.2"
 
 services:
   database:
@@ -8,14 +8,18 @@ services:
       POSTGRES_DB_PASSWORD_FILE: /run/secrets/postgres_password
       POSTGRES_DB: atsea
     networks:
-     - back-tier
+      - back-tier
     secrets:
       - postgres_password
+    deploy:
+      placement:
+        constraints:
+          - 'node.role == worker'
 
   appserver:
-    image: dockersamples/atseaapp
+    image: dockersamples/atseaapp:latest-sophia 
     ports:
-      - "8080:8080" 
+      - "80:8080" 
     networks:
       - front-tier
       - back-tier
@@ -24,7 +28,9 @@ services:
       replicas: 2
       update_config:
         parallelism: 2
-        failure_action: rollback
+      placement:
+        constraints:
+          - 'node.role == worker'
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -33,31 +39,17 @@ services:
     secrets:
       - postgres_password
 
-  visualizer:
-    image: dockersamples/visualizer:stable
-    ports:
-      - "8001:8080"
-    stop_grace_period: 1m30s
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
-    deploy:
-      update_config:
-        failure_action: rollback
-      placement:
-        constraints:
-          - 'node.role == manager'
-
   payment_gateway:
     image: dockersamples/atseapayment
     secrets:
       - source: payment_token
         target: payment_token
+    networks:
+      - payment
     deploy:
-      update_config:
-        failure_action: rollback
       placement:
         constraints:
-          - 'node.labels.pcidss == yes'
+          - 'node.role == worker'
 
 networks:
   front-tier:
@@ -71,6 +63,4 @@ secrets:
   postgres_password:
     external: true
   payment_token:
-    external: true
-  payment_token_b:
     external: true
