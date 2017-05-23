@@ -4,6 +4,8 @@
 
 ## Current build and run (this will be improved)
 ```bash
+curl -L https://github.com/docker/compose/releases/download/1.13.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
+
 mkdir -p app/react-app/node_modules
 npm install --prefix app/react-app
 npm run build --prefix app/react-app
@@ -12,6 +14,14 @@ docker swarm init # needed if not presently in swarm mode
 docker run -ti -v $(pwd):/atsea -w /atsea maven:alpine mvn package -DskipTests
 docker-compose build
 docker-compose up
+
+outras opções:
+	docker deploy --compose-file ./docker-compose.yml mystack
+ou
+	docker stack deploy -c docker-compose-stack.yml rotem
+	
+	parar
+	docker stack rm mystack
 ```
 
 (Unfortunately the above will most likely not work on Linux due to root bind

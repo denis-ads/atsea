@@ -1,4 +1,5 @@
 from alpine
+#from scratch
 
 RUN adduser -D payment
 USER payment

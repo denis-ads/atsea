@@ -16,6 +16,7 @@ site.conf
 .idea
 *.svn
 *.bat
+/.settings
 
 ###################
 *.com
